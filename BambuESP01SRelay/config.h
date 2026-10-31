@@ -25,16 +25,21 @@
 #define HTTP_PORT 80
 
 // ---- JSON ----
-#define JSON_DOC_SIZE        1280
+/* 完整 pushall 报文可达 3~4KB，解析文档在堆上一次性分配（见 mqtt_client.h），
+ * 容量需覆盖完整报文，否则 deserializeJson 会失败、整包字段丢弃 */
+#define JSON_DOC_SIZE        4096
 #define JSON_DOC_SIZE_SMALL   128
 #define JSON_DOC_SIZE_MEDIUM  256
 
-/* 仅支持 ArduinoJson 6.x：文档容量编译期固定，体积最小且不会有堆扩容/碎片 */
+/* 仅支持 ArduinoJson 6.x：7.x 接口不兼容（本项目使用 Static/DynamicJsonDocument） */
 #if ARDUINOJSON_VERSION_MAJOR >= 7
-  #error "请安装 ArduinoJson 6.21.3（检测到 7.x，本项目使用 StaticJsonDocument）"
+  #error "请安装 ArduinoJson 6.21.3（检测到 7.x，本项目使用 ArduinoJson 6.x 接口）"
 #endif
 
 // ---- MQTT ----
+/* PubSubClient 报文缓冲：pushall 完整报文可达 4KB，
+ * 超过缓冲的报文会被库整包丢弃（剩余时间等字段只在完整报文里出现） */
+#define MQTT_BUFFER_SIZE   4096
 #define MQTT_PORT          8883
 #define MQTT_USERNAME      "bblp"
 #define MQTT_TOPIC_REPORT  "device/%s/report"

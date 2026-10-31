@@ -85,7 +85,8 @@ private:
     doc["chamber"] = _status->chamber_temp;
 
     doc["percent"] = _status->mc_percent;
-    doc["remaining"] = _status->mc_remaining_time;
+    // 打印机以「分钟」上报，前端 fmtTime 统一按秒格式化，这里换算
+    doc["remaining"] = _status->mc_remaining_time * 60;
     doc["layer"] = _status->layer_num;
     doc["total_layer"] = _status->total_layer_num;
     doc["filename"] = _status->subtask_name;

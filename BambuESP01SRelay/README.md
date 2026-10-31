@@ -278,7 +278,7 @@ curl -X POST http://192.168.1.50/api/relay -H "Content-Type: application/json" -
 - 每 60 秒发送一次 `{"pushing":{"command":"pushall"}}` 拉取完整状态
 - 解析字段：`gcode_state`、`nozzle_temper`、`nozzle_target_temper`、`bed_temper`、`bed_target_temper`、`mc_percent`、`mc_remaining_time`、`subtask_name`
 
-> `pushall` 完整报文可能超过 PubSubClient 的 1024 字节缓冲，状态主要由打印机主动推送的增量 `push_status` 驱动，属正常现象。
+> `pushall` 完整报文可达 3~4KB（剩余时间 `mc_remaining_time` 等字段主要来自完整报文），因此 PubSubClient 缓冲设为 4096、解析文档设为 4096（堆上复用），容量不足时库会整包丢弃报文。
 
 ---
 
@@ -292,6 +292,7 @@ curl -X POST http://192.168.1.50/api/relay -H "Content-Type: application/json" -
 | 继电器不吸合 / 反复复位 | 供电不足，换 ≥250mA 的 5V 电源，勿用串口板供电 |
 | 串口无日志 | TX/RX 是否交叉、下载器是否 3.3V 电平、波特率 115200 |
 | 状态一直 unknown | 检查打印机 IP、Device ID、Access Code；确认局域网模式；确认同网段 |
+| 剩余时间一直显示 — / 串口出现 `JSON parse failed` | 完整 `pushall` 报文超出缓冲：在 `config.h` 增大 `MQTT_BUFFER_SIZE`（如 5120）与 `JSON_DOC_SIZE`（如 6144）后重新编译 |
 | MQTT 连接失败 | 访问码错误或未开启 LAN 模式；串口日志查看 TLS 握手结果 |
 | 搜不到设备 IP | 路由器后台查 DHCP 列表；或恢复出厂后重新配网 |
 | OTA 上传失败 | 确认选的是 `.bin`；空间不足时先 `/api/reset` 清配置 |

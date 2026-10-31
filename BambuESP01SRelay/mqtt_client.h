@@ -22,7 +22,8 @@ public:
     _secure.setInsecure();
     _secure.setBufferSizes(2048, 2048);
     _client.setServer(cfg.printer_ip, MQTT_PORT);
-    _client.setBufferSize(1024);
+    // 缓冲必须容纳完整 pushall（3~4KB），否则超长报文会被库整包丢弃
+    _client.setBufferSize(MQTT_BUFFER_SIZE);
     _client.setKeepAlive(30);
     _client.setCallback(BambuMQTT::_staticCallback);
 
@@ -64,6 +65,8 @@ public:
 private:
   WiFiClientSecure _secure;
   PubSubClient _client;
+  /* 完整 pushall 报文较大，文档放堆上（只分配一次，复用），避免占用回调栈 */
+  DynamicJsonDocument _doc{JSON_DOC_SIZE};
   const DeviceConfig* _cfg = nullptr;
   PrinterStatus* _status = nullptr;
   char _topicReport[64];
@@ -129,10 +132,13 @@ private:
   }
 
   void onMessage(uint8_t* payload, unsigned int length) {
-    StaticJsonDocument<JSON_DOC_SIZE> doc;
-    if (deserializeJson(doc, payload, length)) return;
+    _doc.clear();
+    if (deserializeJson(_doc, payload, length)) {
+      Serial.printf("[MQTT] JSON parse failed (%u bytes)\n", length);
+      return;
+    }
 
-    JsonVariant pv = doc["print"];
+    JsonVariant pv = _doc["print"];
     if (pv.isNull()) return;
     JsonObject print = pv.as<JsonObject>();
 

@@ -80,7 +80,7 @@ Storage   ──► DeviceConfig 上电加载
 - `PubSubClient`（knolleary）2.8
 - `ArduinoJson`（bblanchon）**6.x**（代码使用 `StaticJsonDocument`，容量编译期固定；7.x 不支持，`config.h` 内有 `#error` 拦截）
 
-内存优化（严格）：TLS 缓冲 2048、PubSubClient 1024、ArduinoJson 文档 1280、HTML/CSS/JS 全部 PROGMEM、避免 String 动态分配、不启用 ArduinoOTA。
+内存优化（严格）：TLS 缓冲 2048、PubSubClient 4096（完整 pushall）、ArduinoJson 解析文档 4096（堆上一次性分配复用）、HTML/CSS/JS 全部 PROGMEM、避免 String 动态分配、不启用 ArduinoOTA。
 
 ### 5.1 机型适配（编译期参数页）
 
