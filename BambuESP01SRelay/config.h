@@ -8,7 +8,7 @@
 
 // ---- 继电器 ----
 #define RELAY_PIN             0      // GPIO0 控制继电器
-#define RELAY_ACTIVE_LEVEL    HIGH   // 触发有效电平（实测可翻转）
+#define RELAY_ACTIVE_LEVEL    LOW    // 触发有效电平：本模块为低电平触发（高电平断开）
 #define RELAY_POWER_ON_STATE  false  // 上电默认：关闭
 
 // ---- 持久化 ----

@@ -32,7 +32,7 @@
 | 部件 | 说明 |
 |---|---|
 | ESP-01S | AI-Thinker，1MB Flash，80KB RAM |
-| ESP-01S 继电器模块 | 5V 供电，GPIO0 控制，高电平触发，10A/250VAC |
+| ESP-01S 继电器模块 | 5V 供电，GPIO0 控制，低电平触发，10A/250VAC |
 | 5V 电源 | **≥250mA**，勿用 CH340 串口板供电 |
 | USB 下载器 | 仅首次烧录需要，后续走 OTA |
 
@@ -72,7 +72,7 @@ Arduino IDE 会把 sketch 目录里的 `.ino` 作为主文件、其余 `.h` 作�
 ```cpp
 // 继电器
 #define RELAY_PIN             0      // GPIO0 控制继电器
-#define RELAY_ACTIVE_LEVEL    HIGH   // 触发有效电平（实测可翻转）
+#define RELAY_ACTIVE_LEVEL    LOW    // 触发有效电平：本模块为低电平触发（高电平断开）
 #define RELAY_POWER_ON_STATE  false  // 上电默认：关闭
 
 // 持久化
@@ -105,7 +105,7 @@ struct RelaySettings {
 };
 ```
 
-- **继电器极性**：市售同型号板有高/低电平两种。若行为相反（开=断），把 `RELAY_ACTIVE_LEVEL` 改为 `LOW` 重新编译即可。
+- **继电器极性**：本机实测为**低电平触发**（`RELAY_ACTIVE_LEVEL LOW`）。市售同型号板也有高电平版本，若你的板行为相反（开=断），把该常量改为 `HIGH` 重新编译即可。
 - **上电安全态**：`RELAY_POWER_ON_STATE = false`，每次上电强制关闭，不持久化运行态，避免意外自启。
 
 打印机参数（IP / Device ID / 访问码）保存在 EEPROM，通过 Web 页面修改，**不需要改代码重编译**。
